@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Web Audio API Playground</title>
+	<link rel="stylesheet" href="css/style.css" />
+	<link rel="stylesheet" href="css/font-awesome.min.css" />
+	<script src="js/pixi.min.js"></script>
+	<script src="js/AudioHandler.js"></script>
+	<script src="js/UIHandler.js"></script>
+	<script src="js/Visualizer.js"></script>
+	<script>
+		window.addEventListener( 'load', function() {
+			AudioHandler.init();
+			UIHandler.init();
+			Visualizer.init();
+			Visualizer.start();
+		} );
+	</script>
+</head>
+<body>
+
+<div id="audio-select">
+	<span class="fa fa-music"></span>
+	<span class="text">Select an audio file …</span>
+</div>
+<input type="file" id="file-input-audio" />
+
+<div class="overlay overlay-info">
+	<table>
+		<tr>
+			<th>File</th>
+			<td class="filename"></td>
+		</tr>
+		<tr>
+			<th>Type</th>
+			<td class="filetype"></td>
+		</tr>
+	</table>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<div class="overlay overlay-audio-pause">
+	<p class="text">Audio has been suspended.<br />Press [space] to resume.</p>
+</div>
+
+<div class="overlay overlay-vis-pause">
+	<p class="text">Page lost focus.<br />Rendering has been stopped.</p>
+</div>
+
+</body>
+</html>

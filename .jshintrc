@@ -1,0 +1,13 @@
+{
+	"browser": true,
+	"expr": true,
+	"globals": {
+		"AudioHandler": true,
+		"PIXI": false,
+		"UIHandler": true,
+		"Visualizer": true
+	},
+	"node": true,
+	"shadow": true,
+	"sub": true
+}
