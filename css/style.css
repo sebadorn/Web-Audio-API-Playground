@@ -13,6 +13,9 @@ body {
 	font-family: "Open Sans", sans-serif;
 	font-size: 14px;
 	overflow: hidden;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	user-select: none;
 }
 
 code, span {
@@ -91,6 +94,7 @@ th {
 	}
 
 .overlay-audio-pause,
+.overlay.error,
 .overlay-vis-pause {
 	border-radius: 4px;
 	display: none;
@@ -98,4 +102,10 @@ th {
 	left: calc( 50% - 150px );
 	top: 40%;
 	width: 300px;
+}
+
+.overlay.error {
+	background-color: #D00000;
+	display: block;
+	top: 20%;
 }

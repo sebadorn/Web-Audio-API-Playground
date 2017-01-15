@@ -4,6 +4,37 @@
 var UIHandler = {
 
 
+	ERR_MESSAGE_TIMEOUT: 8000, // [ms]
+
+
+	/**
+	 * Initialize Drag'n'Drop of files.
+	 */
+	_initDragAndDrop: function() {
+		var overlayAudio = document.body.querySelector( '.overlay-audio-pause' );
+
+		document.body.addEventListener( 'dragover', function( ev ) {
+			ev.preventDefault();
+		} );
+
+		document.body.addEventListener( 'drop', function( ev ) {
+			ev.preventDefault();
+
+			var file = ev.dataTransfer.files[0];
+			var type = String( file.type ).split( '/' )[0];
+
+			if( type !== 'audio' ) {
+				this.showError( new Error( 'File type is: ' + file.type ) );
+				return;
+			}
+
+			this.showFileInfo( file );
+			overlayAudio.style.display = 'none';
+			AudioHandler.loadFile( file );
+		}.bind( this ) );
+	},
+
+
 	/**
 	 * Initialize the file select.
 	 */
@@ -18,9 +49,17 @@ var UIHandler = {
 		} );
 
 		input.addEventListener( 'change', function( ev ) {
-			this.showFileInfo( ev.target.files[0] );
+			var file = ev.target.files[0];
+			var type = String( file.type ).split( '/' )[0];
+
+			if( type !== 'audio' ) {
+				this.showError( new Error( 'File type is: ' + file.type ) );
+				return;
+			}
+
+			this.showFileInfo( file );
 			overlayAudio.style.display = 'none';
-			AudioHandler.loadFile( ev.target.files[0] );
+			AudioHandler.loadFile( file );
 		}.bind( this ) );
 	},
 
@@ -71,6 +110,32 @@ var UIHandler = {
 		this._registerEventListeners();
 		this._initKeyboardHandler();
 		this._initFileSelect();
+		this._initDragAndDrop();
+	},
+
+
+	/**
+	 * Show an error message.
+	 * @param {Error} err
+	 */
+	showError: function( err ) {
+		var container = document.createElement( 'div' );
+		container.className = 'overlay error';
+		container.innerHTML = err.message;
+
+		document.body.appendChild( container );
+
+		container.addEventListener( 'click', function() {
+			if( container.parentNode ) {
+				container.parentNode.removeChild( container );
+			}
+		} );
+
+		setTimeout( function() {
+			if( container.parentNode ) {
+				container.parentNode.removeChild( container );
+			}
+		}, UIHandler.ERR_MESSAGE_TIMEOUT );
 	},
 
 

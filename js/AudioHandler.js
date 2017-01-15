@@ -26,16 +26,26 @@ var AudioHandler = {
 
 		this.source = this.audioCtx.createBufferSource();
 
-		this.audioCtx.decodeAudioData( audioData, function( buffer ) {
-			this.source.buffer = buffer;
-			this.source.connect( this.analyser );
+		this.audioCtx.decodeAudioData(
+			audioData,
 
-			var length = this.analyser.frequencyBinCount;
-			this._dataTimeDomain = new Uint8Array( length );
-			this._dataFrequency = new Uint8Array( length );
+			function( buffer ) {
+				this.source.buffer = buffer;
+				this.source.connect( this.analyser );
 
-			this.source.start();
-		}.bind( this ) );
+				var length = this.analyser.frequencyBinCount;
+				this._dataTimeDomain = new Uint8Array( length );
+				this._dataFrequency = new Uint8Array( length );
+
+				this.source.start();
+			}.bind( this ),
+
+			function( err ) {
+				err = new Error( err ? err.err : 'Failed to decode audio data.' );
+				console.error( err );
+				UIHandler.showError( err );
+			}
+		);
 	},
 
 
