@@ -8,11 +8,22 @@ var UIHandler = {
 
 
 	/**
+	 * Initialize control buttons.
+	 */
+	_initControls: function() {
+		var controlPlay = document.getElementById( 'control-play' );
+
+		controlPlay.addEventListener( 'click', function( ev ) {
+			var state = AudioHandler.togglePlayback();
+			this.updateControls( state );
+		}.bind( this ) );
+	},
+
+
+	/**
 	 * Initialize Drag'n'Drop of files.
 	 */
 	_initDragAndDrop: function() {
-		var overlayAudio = document.body.querySelector( '.overlay-audio-pause' );
-
 		document.body.addEventListener( 'dragover', function( ev ) {
 			ev.preventDefault();
 		} );
@@ -29,7 +40,7 @@ var UIHandler = {
 			}
 
 			this.showFileInfo( file );
-			overlayAudio.style.display = 'none';
+			this.updateControls();
 			AudioHandler.loadFile( file );
 		}.bind( this ) );
 	},
@@ -39,7 +50,6 @@ var UIHandler = {
 	 * Initialize the file select.
 	 */
 	_initFileSelect: function() {
-		var overlayAudio = document.body.querySelector( '.overlay-audio-pause' );
 		var trigger = document.getElementById( 'audio-select' );
 		var input = document.getElementById( 'file-input-audio' );
 
@@ -58,7 +68,7 @@ var UIHandler = {
 			}
 
 			this.showFileInfo( file );
-			overlayAudio.style.display = 'none';
+			this.updateControls();
 			AudioHandler.loadFile( file );
 		}.bind( this ) );
 	},
@@ -68,16 +78,14 @@ var UIHandler = {
 	 * Initialize keyboard event handling.
 	 */
 	_initKeyboardHandler: function() {
-		var overlayAudio = document.body.querySelector( '.overlay-audio-pause' );
-
 		document.body.addEventListener( 'keyup', function( ev ) {
 			switch( ev.keyCode ) {
 				case 32: // spacebar
 					var state = AudioHandler.togglePlayback();
-					overlayAudio.style.display = ( state === 'running' ) ? 'none' : 'block';
+					this.updateControls( state );
 					break;
 			}
-		} );
+		}.bind( this ) );
 	},
 
 
@@ -110,6 +118,7 @@ var UIHandler = {
 		this._registerEventListeners();
 		this._initKeyboardHandler();
 		this._initFileSelect();
+		this._initControls();
 		this._initDragAndDrop();
 	},
 
@@ -144,20 +153,40 @@ var UIHandler = {
 	 * @param {File} file
 	 */
 	showFileInfo: function( file ) {
-		var overlay = document.body.querySelector( '.overlay-info' );
+		var overlayInfo = document.body.querySelector( '.overlay-info' );
+		var overlayControls = document.body.querySelector( '.controls' );
 
 		if( !file ) {
-			overlay.style.display = 'none';
+			overlayInfo.style.display = 'none';
+			overlayControls.style.display = 'none';
 			return;
 		}
 
-		var fileName = overlay.querySelector( '.filename' );
-		var fileType = overlay.querySelector( '.filetype' );
+		var fileName = overlayInfo.querySelector( '.filename' );
+		var fileType = overlayInfo.querySelector( '.filetype' );
 
 		fileName.textContent = file.name;
 		fileType.textContent = file.type;
 
-		overlay.style.display = 'block';
+		overlayInfo.style.display = 'block';
+		overlayControls.style.display = 'block';
+	},
+
+
+	/**
+	 * Update the controls.
+	 * @param {String} state Audio context state.
+	 */
+	updateControls: function( state ) {
+		state = state || AudioHandler.audioCtx.state;
+		var controlPlay = document.getElementById( 'control-play' );
+
+		if( state === 'running' ) {
+			controlPlay.className = 'fa fa-pause';
+		}
+		else {
+			controlPlay.className = 'fa fa-play';
+		}
 	}
 
 

@@ -43,6 +43,7 @@ th {
 }
 
 #audio-select {
+	color: #000000;
 	cursor: pointer;
 	display: flex;
 	left: 60px;
@@ -52,27 +53,50 @@ th {
 }
 
 	#audio-select .fa {
-		background-color: #A2143B;
+		background-color: rgba( 255, 255, 255, 0.8 );
 		font-size: 24px;
 		padding: 10px;
 		width: 24px;
 	}
 
 	#audio-select .text {
-		background-color: #7E162B;
+		background-color: rgba( 255, 255, 255, 0.6 );
 		padding: 10px 20px;
 	}
 
 	#audio-select:hover .text {
-		background-color: #641323;
+		background-color: rgba( 255, 255, 255, 0.8 );
 	}
 
 #file-input-audio {
 	display: none;
 }
 
+.controls {
+	color: #000000;
+	cursor: pointer;
+	display: none;
+	left: calc( 50% - 220px );
+	position: absolute;
+	top: 360px;
+	width: 440px;
+}
+
+	.controls .fa {
+		background-color: rgba( 255, 255, 255, 0.6 );
+		font-size: 12px;
+		line-height: 12px;
+		padding: 10px;
+		text-align: center;
+		width: 12px;
+	}
+
+	.controls .fa:hover {
+		background-color: rgba( 255, 255, 255, 0.8 );
+	}
+
 .overlay {
-	background-color: rgba( 0, 0, 0, 0.4 );
+	background-color: rgba( 0, 0, 0, 0.2 );
 	box-sizing: border-box;
 	line-height: 150%;
 	padding: 16px 20px;
@@ -81,13 +105,13 @@ th {
 
 .overlay-info {
 	display: none;
-	left: 60px;
-	min-width: 226px;
-	top: 124px;
+	left: calc( 50% - 220px );
+	width: 440px;
+	top: 270px;
 }
 
 	.overlay-info td {
-		max-width: 400px;
+		max-width: 340px;
 		overflow-x: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
@@ -96,16 +120,15 @@ th {
 .overlay-audio-pause,
 .overlay.error,
 .overlay-vis-pause {
-	border-radius: 4px;
 	display: none;
 	font-weight: bold;
-	left: calc( 50% - 150px );
-	top: 40%;
+	right: 60px;
+	top: 60px;
 	width: 300px;
 }
 
 .overlay.error {
-	background-color: #D00000;
+	background-color: rgba( 255, 0, 0, 0.8 );
 	display: block;
-	top: 20%;
+	top: 144px;
 }

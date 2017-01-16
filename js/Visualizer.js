@@ -32,14 +32,11 @@ var Visualizer = {
 		}
 
 		var data = AudioHandler.getVisualizationData();
-		var avgFreq = 0;
 
-		if( data ) {
-			V._drawTimeDomain( data );
-			avgFreq = V._drawFrequency( data );
-		}
+		V._drawTimeDomain( data );
+		var avgFreq = V._drawFrequency( data );
 
-		var colorBg = V.rgbToHex( avgFreq * 0.5, 24, 48 );
+		var colorBg = V.rgbToHex( avgFreq * 0.5, 16, 32 );
 		V._drawBackground( colorBg );
 
 		V.renderer.render( V._view );
@@ -74,6 +71,10 @@ var Visualizer = {
 	_drawFrequency: function( data ) {
 		this._viewBars.clear();
 
+		if( !data ) {
+			return 0.0;
+		}
+
 		var bufferLen = data.frequency.length;
 		var w = this.renderer.width / bufferLen;
 		var avg = 0;
@@ -106,22 +107,26 @@ var Visualizer = {
 	_drawTimeDomain: function( data ) {
 		this._viewGraph.clear();
 
-		var bufferLen = data.timeDomain.length;
-
-		if( bufferLen === 0 ) {
-			return;
-		}
-
 		var maxWidth = 440;
 		var maxHeight = 200;
 		var x = ( this.renderer.width - maxWidth ) * 0.5;
-		var w = maxWidth / ( bufferLen - 1 );
 
 		this._viewGraph.beginFill( 0x000000, 0.2 );
 		this._viewGraph.drawRect( x, 0, maxWidth, maxHeight );
 		this._viewGraph.endFill();
 
 		this._viewGraph.lineStyle( 2, 0xFFFFFF );
+
+		var bufferLen = data ? data.timeDomain.length : 0;
+
+		if( bufferLen === 0 ) {
+			this._viewGraph.moveTo( x, 0.5 * maxHeight );
+			this._viewGraph.lineTo( x + maxWidth, 0.5 * maxHeight );
+			return;
+		}
+
+		var w = maxWidth / ( bufferLen - 1 );
+
 		this._viewGraph.moveTo( x, data.timeDomain[0] * 0.00392156862745098 * maxHeight );
 
 		for( var i = 1; i < bufferLen; i++ ) {
