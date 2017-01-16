@@ -34,7 +34,7 @@ var UIHandler = {
 			var file = ev.dataTransfer.files[0];
 			var type = String( file.type ).split( '/' )[0];
 
-			if( type !== 'audio' ) {
+			if( type !== 'audio' && type !== 'video' ) {
 				this.showError( new Error( 'File type is: ' + file.type ) );
 				return;
 			}
@@ -62,7 +62,7 @@ var UIHandler = {
 			var file = ev.target.files[0];
 			var type = String( file.type ).split( '/' )[0];
 
-			if( type !== 'audio' ) {
+			if( type !== 'audio' && type !== 'video' ) {
 				this.showError( new Error( 'File type is: ' + file.type ) );
 				return;
 			}
