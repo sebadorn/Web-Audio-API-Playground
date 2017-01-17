@@ -32,9 +32,8 @@ var UIHandler = {
 			ev.preventDefault();
 
 			var file = ev.dataTransfer.files[0];
-			var type = String( file.type ).split( '/' )[0];
 
-			if( type !== 'audio' && type !== 'video' ) {
+			if( AudioHandler.isPlayableMimeType( file.type ) ) {
 				this.showError( new Error( 'File type is: ' + file.type ) );
 				return;
 			}
@@ -60,9 +59,8 @@ var UIHandler = {
 
 		input.addEventListener( 'change', function( ev ) {
 			var file = ev.target.files[0];
-			var type = String( file.type ).split( '/' )[0];
 
-			if( type !== 'audio' && type !== 'video' ) {
+			if( !AudioHandler.isPlayableMimeType( file.type ) ) {
 				this.showError( new Error( 'File type is: ' + file.type ) );
 				return;
 			}
@@ -108,6 +106,30 @@ var UIHandler = {
 			overlayStop.style.display = 'none';
 			Visualizer.start();
 		} );
+	},
+
+
+	/**
+	 * Handle mousedown event on the Pixi-drawn trackbar.
+	 * @param {Event} ev
+	 */
+	handleTrackClick: function( ev ) {
+		var trackYOffset = 12;
+		var trackWidth = 392;
+		var trackHeight = 8;
+		var x = ev.data.global.x - ev.target.position.x - trackYOffset;
+		var y = ev.data.global.y - ev.target.position.y - trackYOffset;
+
+		// Click is outside progress bar.
+		if( x < 0 || y < 0 ) {
+			return;
+		}
+		else if( x > trackWidth || y > trackHeight ) {
+			return;
+		}
+
+		var progress = x / trackWidth;
+		AudioHandler.jumpToProgress( progress );
 	},
 
 
@@ -175,13 +197,12 @@ var UIHandler = {
 
 	/**
 	 * Update the controls.
-	 * @param {String} state Audio context state.
+	 * @param {AudioHandler.PLAYBACK_STATE} state Audio playback state.
 	 */
 	updateControls: function( state ) {
-		state = state || AudioHandler.audioCtx.state;
 		var controlPlay = document.getElementById( 'control-play' );
 
-		if( state === 'running' ) {
+		if( state === AudioHandler.PLAYBACK_STATE.PAUSED ) {
 			controlPlay.className = 'fa fa-pause';
 		}
 		else {

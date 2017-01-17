@@ -11,6 +11,7 @@ var Visualizer = {
 	_viewBars: null,
 	_viewGraph: null,
 	_viewInfo: null,
+	_viewTrack: null,
 
 	renderer: null,
 	ticker: null,
@@ -33,6 +34,7 @@ var Visualizer = {
 
 		var data = AudioHandler.getVisualizationData();
 
+		V._drawTrackProgress( data );
 		V._drawTimeDomain( data );
 		var avgFreq = V._drawFrequency( data );
 
@@ -138,6 +140,45 @@ var Visualizer = {
 
 
 	/**
+	 * Draw the progress bar.
+	 * @param {Object} data Audio data.
+	 */
+	_drawTrackProgress: function( data ) {
+		this._viewTrack.clear();
+
+		if( !data ) {
+			return;
+		}
+
+		var total = data.trackDuration;
+		var now = data.trackCurrentTime;
+		var progress = ( total > 0 ) ? ( now / total ) : 0;
+
+		var maxHeight = 32; // Also is the width of the play/pause button.
+		var maxWidth = 440;
+		this._viewTrack.position.x = ( this.renderer.width - maxWidth ) * 0.5 + maxHeight;
+		maxWidth -= maxHeight;
+
+		var trackHeight = 8;
+		var y = ( maxHeight - trackHeight ) * 0.5;
+		var x = y;
+		var maxTrackWidth = maxWidth - x * 2;
+
+		this._viewTrack.beginFill( 0x000000, 0.2 );
+		this._viewTrack.drawRect( 0, 0, maxWidth, maxHeight );
+		this._viewTrack.endFill();
+
+		this._viewTrack.beginFill( 0x000000, 0.2 );
+		this._viewTrack.drawRect( x, y, maxTrackWidth, trackHeight );
+		this._viewTrack.endFill();
+
+		this._viewTrack.beginFill( 0xFFFFFF );
+		this._viewTrack.drawRect( x, y, maxTrackWidth * progress, trackHeight );
+		this._viewTrack.endFill();
+	},
+
+
+	/**
 	 * Convert a decimal value to a hex string (two chars, no leading "0x").
 	 * @param  {Number} x
 	 * @return {String}
@@ -177,13 +218,31 @@ var Visualizer = {
 		this.ticker.stop();
 
 		this._view = new PIXI.Container();
+		this._view.interactive = false;
+
 		this._viewBackground = new PIXI.Graphics();
+		this._viewBackground.interactive = false;
+		this._viewBackground.interactiveChildren = false;
+
 		this._viewBars = new PIXI.Graphics();
+		this._viewBars.interactive = false;
+		this._viewBars.interactiveChildren = false;
 
 		this._viewGraph = new PIXI.Graphics();
+		this._viewGraph.interactive = false;
+		this._viewGraph.interactiveChildren = false;
 		this._viewGraph.position.y = 60;
 
+		this._viewTrack = new PIXI.Graphics();
+		this._viewTrack.interactive = true;
+		this._viewTrack.interactiveChildren = false;
+		this._viewTrack.position.y = 360;
+
+		this._viewTrack.on( 'mousedown', UIHandler.handleTrackClick.bind( UIHandler ) );
+
 		this._viewInfo = new PIXI.Container();
+		this._viewInfo.interactive = false;
+		this._viewInfo.interactiveChildren = false;
 		this._viewInfo.position.set( 10, 10 );
 
 		this._viewFPS = new PIXI.Text( '', {
@@ -194,12 +253,10 @@ var Visualizer = {
 
 		this._viewInfo.addChild( this._viewFPS );
 
-		this._view.interactive = false;
-		this._view.interactiveChildren = false;
-
 		this._view.addChild( this._viewBackground );
 		this._view.addChild( this._viewBars );
 		this._view.addChild( this._viewGraph );
+		this._view.addChild( this._viewTrack );
 		this._view.addChild( this._viewInfo );
 	},
 

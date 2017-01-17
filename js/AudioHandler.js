@@ -6,6 +6,7 @@ var AudioHandler = {
 
 	analyser: null,
 	audioCtx: null,
+	audioElement: null,
 	source: null,
 
 	_dataFrequency: null,
@@ -13,39 +14,29 @@ var AudioHandler = {
 
 	FFT_SIZE: 256,
 
+	PLAYBACK_STATE: {
+		PLAYING: 1,
+		PAUSED: 2
+	},
+
 
 	/**
 	 * Prepare to analyse the given audio data.
 	 * @param {ArrayBuffer} audioData
 	 */
-	analyse: function( audioData ) {
+	analyse: function( audioElement ) {
 		if( this.source ) {
-			this.source.stop();
 			this.source.disconnect();
 		}
 
-		this.source = this.audioCtx.createBufferSource();
+		this.source = this.audioCtx.createMediaElementSource( audioElement );
+		this.source.connect( this.analyser );
 
-		this.audioCtx.decodeAudioData(
-			audioData,
+		var length = this.analyser.frequencyBinCount;
+		this._dataTimeDomain = new Uint8Array( length );
+		this._dataFrequency = new Uint8Array( length );
 
-			function( buffer ) {
-				this.source.buffer = buffer;
-				this.source.connect( this.analyser );
-
-				var length = this.analyser.frequencyBinCount;
-				this._dataTimeDomain = new Uint8Array( length );
-				this._dataFrequency = new Uint8Array( length );
-
-				this.source.start();
-			}.bind( this ),
-
-			function( err ) {
-				err = new Error( err ? err.err : 'Failed to decode audio data.' );
-				console.error( err );
-				UIHandler.showError( err );
-			}
-		);
+		audioElement.play();
 	},
 
 
@@ -62,8 +53,10 @@ var AudioHandler = {
 		this.analyser.getByteFrequencyData( this._dataFrequency );
 
 		return {
+			frequency: this._dataFrequency,
 			timeDomain: this._dataTimeDomain,
-			frequency: this._dataFrequency
+			trackCurrentTime: this.audioElement.currentTime,
+			trackDuration: this.audioElement.duration
 		};
 	},
 
@@ -72,12 +65,36 @@ var AudioHandler = {
 	 * Initialize.
 	 */
 	init: function() {
+		this.audioElement = document.getElementById( 'audio-element' );
+
 		var AudioContext = window.AudioContext || window.webkitAudioContext;
 		this.audioCtx = new AudioContext();
 
 		this.analyser = this.audioCtx.createAnalyser();
 		this.analyser.connect( this.audioCtx.destination );
 		this.analyser.fftSize = this.FFT_SIZE;
+	},
+
+
+	/**
+	 * Check if the given mime type indicates a playable file.
+	 * The mime type may be wrong, though.
+	 * @param  {String}  mimeType
+	 * @return {Boolean}
+	 */
+	isPlayableMimeType: function( mimeType ) {
+		var type = String( mimeType ).split( '/' )[0];
+
+		return ( type === 'audio' || type === 'video' );
+	},
+
+
+	/**
+	 * Jump to a certain track progress.
+	 * @param {Number} progress
+	 */
+	jumpToProgress: function( progress ) {
+		this.audioElement.currentTime = progress * this.audioElement.duration;
 	},
 
 
@@ -89,16 +106,19 @@ var AudioHandler = {
 		var fr = new FileReader();
 
 		fr.addEventListener( 'load', function( ev ) {
-			this.analyse( ev.target.result );
+			this.audioElement.type = file.type;
+			this.audioElement.src = ev.target.result;
+
+			this.analyse( this.audioElement );
 		}.bind( this ) );
 
-		fr.readAsArrayBuffer( file );
+		fr.readAsDataURL( file );
 	},
 
 
 	/**
 	 * Toggle audio playback.
-	 * @return {String} The new state: "suspended" or "running".
+	 * @return {AudioHandler.PLAYBACK_STATE} The new state.
 	 */
 	togglePlayback: function() {
 		if( !this.source ) {
@@ -107,13 +127,13 @@ var AudioHandler = {
 
 		var state = null;
 
-		if( this.audioCtx.state === 'running' ) {
-			this.audioCtx.suspend();
-			state = 'suspended';
+		if( this.audioElement.paused ) {
+			this.audioElement.play();
+			state = this.PLAYBACK_STATE.PLAYING;
 		}
 		else {
-			this.audioCtx.resume();
-			state = 'running';
+			this.audioElement.pause();
+			state = this.PLAYBACK_STATE.PAUSED;
 		}
 
 		return state;
