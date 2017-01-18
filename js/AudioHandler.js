@@ -41,6 +41,42 @@ var AudioHandler = {
 
 
 	/**
+	 * @see http://stackoverflow.com/a/32549481/915570
+	 * @param  {String} dataURI
+	 * @return {Blob}
+	 */
+	dataURItoBlob: function( dataURI ) {
+		// Split the input to get the mime-type
+		// and the data itself.
+		var cutPos = dataURI.indexOf( ',' ) + 1;
+		var header = dataURI.substr( 0, cutPos );
+		var data = dataURI.substr( cutPos );
+
+		// First part contains data:audio/x;base64
+		// from which we only need audio/x.
+		var type = header.split( ':' )[1].split( ';' )[0];
+
+		// Second part is the data itself and we decode it.
+		var byteString = atob( data );
+		var byteStringLen = byteString.length;
+
+		// Create ArrayBuffer with the byte
+		// string and set the length to it.
+		var ab = new ArrayBuffer( byteStringLen );
+
+		// Create a typed array out of the array buffer representing
+		// each character from as a 8-bit unsigned integer.
+		var intArray = new Uint8Array( ab );
+
+		for ( var i = 0; i < byteStringLen; i++ ) {
+			intArray[i] = byteString.charCodeAt( i );
+		}
+
+		return new Blob( [intArray], { type: type } );
+	},
+
+
+	/**
 	 * Get the analysed audio data for visualization.
 	 * @return {Object}
 	 */
@@ -106,8 +142,16 @@ var AudioHandler = {
 		var fr = new FileReader();
 
 		fr.addEventListener( 'load', function( ev ) {
-			this.audioElement.type = file.type;
-			this.audioElement.src = ev.target.result;
+			// In Firefox just doing:
+			//   this.audioElement.src = ev.target.result;
+			// is enough. But Chrome first complains about CORS, then
+			// after setting crossOrigin="anonymous" complains about
+			// not finding a valid source. I finally found this solution.
+			// @see http://stackoverflow.com/a/32549481/915570
+
+			var audioBlob = this.dataURItoBlob( ev.target.result );
+			this.audioElement = new Audio();
+			this.audioElement.src = URL.createObjectURL( audioBlob );
 
 			this.analyse( this.audioElement );
 		}.bind( this ) );
