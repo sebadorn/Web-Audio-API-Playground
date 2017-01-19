@@ -33,7 +33,7 @@ var UIHandler = {
 
 			var file = ev.dataTransfer.files[0];
 
-			if( AudioHandler.isPlayableMimeType( file.type ) ) {
+			if( !AudioHandler.isPlayableMimeType( file.type ) ) {
 				this.showError( new Error( 'File type is: ' + file.type ) );
 				return;
 			}
