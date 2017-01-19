@@ -60,7 +60,7 @@ var Visualizer = {
 	_drawBackground: function( color ) {
 		this._viewBackground.clear();
 		this._viewBackground.beginFill( color );
-		this._viewBackground.drawRect( 0, 0, this.renderer.width, this.renderer.height );
+		this._viewBackground.drawRect( 0, 0, window.innerWidth, window.innerHeight );
 		this._viewBackground.endFill();
 	},
 
@@ -78,18 +78,18 @@ var Visualizer = {
 		}
 
 		var bufferLen = data.frequency.length;
-		var w = this.renderer.width / bufferLen;
+		var w = window.innerWidth / bufferLen;
 		var avg = 0;
 		var x = 0;
 
 		for( var i = 0; i < bufferLen; i++ ) {
 			var f = data.frequency[i];
 			var percent = f * 0.00392156862745098; // f / 255.0
-			var h = percent * this.renderer.height;
+			var h = percent * window.innerHeight;
 			var color = this.rgbToHex( f, 0, 0 );
 
 			this._viewBars.beginFill( color );
-			this._viewBars.drawRect( x, this.renderer.height - h, w, h );
+			this._viewBars.drawRect( x, window.innerHeight - h, w, h );
 			this._viewBars.endFill();
 
 			x += w;
@@ -111,7 +111,7 @@ var Visualizer = {
 
 		var maxWidth = 440;
 		var maxHeight = 200;
-		var x = ( this.renderer.width - maxWidth ) * 0.5;
+		var x = ( window.innerWidth - maxWidth ) * 0.5;
 
 		this._viewGraph.beginFill( 0x000000, 0.2 );
 		this._viewGraph.drawRect( x, 0, maxWidth, maxHeight );
@@ -156,7 +156,7 @@ var Visualizer = {
 
 		var maxHeight = 32; // Also is the width of the play/pause button.
 		var maxWidth = 440;
-		this._viewTrack.position.x = ( this.renderer.width - maxWidth ) * 0.5 + maxHeight;
+		this._viewTrack.position.x = ( window.innerWidth - maxWidth ) * 0.5 + maxHeight;
 		maxWidth -= maxHeight;
 
 		var trackHeight = 8;
@@ -210,8 +210,15 @@ var Visualizer = {
 			resolution: window.devicePixelRatio
 		};
 
-		this.renderer = PIXI.autoDetectRenderer( window.innerWidth, window.innerHeight, options );
+		this.renderer = PIXI.autoDetectRenderer(
+			window.innerWidth,
+			window.innerHeight,
+			options
+		);
 		this.renderer.backgroundColor = 0x303030;
+
+		this.renderer.view.style.width = window.innerWidth + 'px';
+		this.renderer.view.style.height = window.innerHeight + 'px';
 
 		this.ticker = PIXI.ticker.shared;
 		this.ticker.autoStart = false;
