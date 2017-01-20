@@ -275,6 +275,9 @@ var Visualizer = {
 	 */
 	resize: function( w, h ) {
 		this.renderer.resize( w, h );
+
+		this.renderer.view.style.width = w + 'px';
+		this.renderer.view.style.height = h + 'px';
 	},
 
 
